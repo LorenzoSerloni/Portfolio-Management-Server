@@ -7,7 +7,7 @@ bind = f"0.0.0.0:{port}"
 backlog = 2048
 
 # Worker processes
-workers = multiprocessing.cpu_count() * 2 + 1
+workers = 5
 worker_class = 'sync'  # Use sync for Railway
 worker_connections = 1000
 max_requests = 1000
@@ -42,3 +42,4 @@ def on_starting(server):
     """Called just before the master process is initialized."""
     print(f"Starting Gunicorn server on port {port}...")
     print(f"Using {workers} workers")
+
