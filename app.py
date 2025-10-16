@@ -218,7 +218,6 @@ def getPortfolioStocksCharts():
 
 @app.route('/portfolio/value/chart')
 @validate_owner_id
-@app.route('/portfolio/value/chart')
 def getPortfolioChart():
     owner_id = request.args.get("owner_id")
     range_filter = request.args.get("range", "1w")
@@ -632,5 +631,6 @@ if __name__ == "__main__":
     # Only for development
 
     app.run(debug=False, host="0.0.0.0", port=5000)
+
 
 
