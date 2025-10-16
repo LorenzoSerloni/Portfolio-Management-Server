@@ -221,6 +221,8 @@ def getPortfolioStocksCharts():
 def getPortfolioChart():
     owner_id = request.args.get("owner_id")
     
+    range_filter = request.args.get("range", "1w")
+
     if not owner_id:
         return jsonify({"error": "Missing owner_id"}), 400
 
@@ -228,16 +230,38 @@ def getPortfolioChart():
     doc = getPortfolioDoc(db, owner_id)
     if not doc:
         return {}
+        return jsonify({"history": {}})
+
+    timesAndValues = doc.get("history", {})
+
+    history_filtered = {}
+    today = datetime.now(timezone.utc).date()
+
+    if range_filter == "1w":
+        start_date = today - timedelta(weeks=1)
+    elif range_filter == "1mo":
+        start_date = today - timedelta(days=30)
+    elif range_filter == "3mo":
+        start_date = today - timedelta(days=90)
+    else:
+        start_date = None 
 
     timesAndValues = doc.get("history")
+    for date_str, value in timesAndValues.items():
+        date_obj = datetime.strptime(date_str, "%Y-%m-%d").date()
+        if start_date is None or date_obj >= start_date:
+            history_filtered[date_str] = value
 
     if reference_currency != "USD":
         converted_history = {}
         for date, value in timesAndValues.items():
+        for date, value in history_filtered.items():
             converted_history[date] = convert_currency(value, 'USD', reference_currency)
         return jsonify({"history": converted_history}) 
+        return jsonify({"history": converted_history})
 
     return jsonify({"history": timesAndValues})
+    return jsonify({"history": history_filtered})
 
 @app.route('/portfolio/value')
 @validate_owner_id
@@ -613,3 +637,4 @@ if __name__ == "__main__":
     # Only for development
 
     app.run(debug=False, host="0.0.0.0", port=5000)
+
