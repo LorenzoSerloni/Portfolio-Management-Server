@@ -218,9 +218,9 @@ def getPortfolioStocksCharts():
 
 @app.route('/portfolio/value/chart')
 @validate_owner_id
+@app.route('/portfolio/value/chart')
 def getPortfolioChart():
     owner_id = request.args.get("owner_id")
-    
     range_filter = request.args.get("range", "1w")
 
     if not owner_id:
@@ -229,7 +229,6 @@ def getPortfolioChart():
     reference_currency = getReferenceCurrency(db, owner_id)
     doc = getPortfolioDoc(db, owner_id)
     if not doc:
-        return {}
         return jsonify({"history": {}})
 
     timesAndValues = doc.get("history", {})
@@ -246,7 +245,6 @@ def getPortfolioChart():
     else:
         start_date = None 
 
-    timesAndValues = doc.get("history")
     for date_str, value in timesAndValues.items():
         date_obj = datetime.strptime(date_str, "%Y-%m-%d").date()
         if start_date is None or date_obj >= start_date:
@@ -254,13 +252,10 @@ def getPortfolioChart():
 
     if reference_currency != "USD":
         converted_history = {}
-        for date, value in timesAndValues.items():
         for date, value in history_filtered.items():
             converted_history[date] = convert_currency(value, 'USD', reference_currency)
-        return jsonify({"history": converted_history}) 
         return jsonify({"history": converted_history})
 
-    return jsonify({"history": timesAndValues})
     return jsonify({"history": history_filtered})
 
 @app.route('/portfolio/value')
@@ -637,4 +632,5 @@ if __name__ == "__main__":
     # Only for development
 
     app.run(debug=False, host="0.0.0.0", port=5000)
+
 
