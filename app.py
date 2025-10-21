@@ -228,7 +228,7 @@ def getPortfolioChart():
     reference_currency = getReferenceCurrency(db, owner_id)
     doc = getPortfolioDoc(db, owner_id)
     if not doc:
-        return jsonify({"history": []})
+        return jsonify({"history": {}})
 
     timesAndValues = doc.get("history", {})
 
@@ -631,6 +631,7 @@ if __name__ == "__main__":
     # Only for development
 
     app.run(debug=False, host="0.0.0.0", port=5000)
+
 
 
 
