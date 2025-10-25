@@ -569,6 +569,11 @@ def buyStock():
         doc_data = doc.get()
     
     docData = doc_data.to_dict()
+
+    stocksNumber = len(docData.get("stocks", {}))
+
+    if stocksNumber >= 10:
+        return jsonify({"error": "Maximum number of different stocks reached (10)"}), 400
     
     data = request.get_json()
     
@@ -631,6 +636,7 @@ if __name__ == "__main__":
     # Only for development
 
     app.run(debug=False, host="0.0.0.0", port=5000)
+
 
 
 
