@@ -11,7 +11,6 @@ import os
 import logging
 from logging.handlers import RotatingFileHandler
 from functools import wraps
-from google.cloud.firestore import FieldPath
 
 # Load environment variables
 load_dotenv(".env")
@@ -649,6 +648,7 @@ if __name__ == "__main__":
     # Only for development
 
     app.run(debug=False, host="0.0.0.0", port=5000)
+
 
 
 
