@@ -515,22 +515,30 @@ def sellStock():
         stocks = docData.get("stocks", {})
         total_stocks_remaining = sum(stocks.values()) - quantity
 
+        # Get current stocks and update manually
+        current_stocks = docData.get("stocks", {}).copy()
+        
         if ownedQuantity == quantity:
+            # Remove the stock entirely
+            del current_stocks[symbol]
+            
             if total_stocks_remaining == 0:
                 doc.update({
-                    FieldPath("stocks", symbol): firestore.DELETE_FIELD,
+                    "stocks": current_stocks,
                     "cost": 0,
                     f"history.{today_str}": 0
                 })
             else:
                 doc.update({
-                    FieldPath("stocks", symbol): firestore.DELETE_FIELD,
+                    "stocks": current_stocks,
                     "cost": firestore.Increment(price * quantity * -1),
                     f"history.{today_str}": firestore.Increment(price * quantity * -1 + yesterdayValueNotAdded)
                 })
         else:
+            # Decrease the quantity
+            current_stocks[symbol] = ownedQuantity - quantity
             doc.update({
-                FieldPath("stocks", symbol): firestore.Increment(-quantity),
+                "stocks": current_stocks,
                 "cost": firestore.Increment(price * quantity * -1),
                 f"history.{today_str}": firestore.Increment(price * quantity * -1 + yesterdayValueNotAdded)
             })
@@ -616,8 +624,12 @@ def buyStock():
     stock_value = price * quantity
     history_increment = stock_value + yesterdayValueNotAdded
 
+    # Get current stocks and update manually
+    current_stocks = docData.get("stocks", {}).copy()
+    current_stocks[symbol] = current_stocks.get(symbol, 0) + quantity
+
     doc.update({
-        FieldPath("stocks", symbol): firestore.Increment(quantity),
+        "stocks": current_stocks,
         "cost": firestore.Increment(stock_value),
         f"history.{today_str}": firestore.Increment(history_increment)
     })
@@ -637,6 +649,7 @@ if __name__ == "__main__":
     # Only for development
 
     app.run(debug=False, host="0.0.0.0", port=5000)
+
 
 
 
