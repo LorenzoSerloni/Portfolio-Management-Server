@@ -11,6 +11,7 @@ import os
 import logging
 from logging.handlers import RotatingFileHandler
 from functools import wraps
+from firebase_admin.firestore import FieldPath
 
 # Load environment variables
 load_dotenv(".env")
@@ -517,19 +518,19 @@ def sellStock():
         if ownedQuantity == quantity:
             if total_stocks_remaining == 0:
                 doc.update({
-                    f"stocks.{symbol}": firestore.DELETE_FIELD,
+                    FieldPath("stocks", symbol): firestore.DELETE_FIELD,
                     "cost": 0,
                     f"history.{today_str}": 0
                 })
             else:
                 doc.update({
-                    f"stocks.{symbol}": firestore.DELETE_FIELD,
+                    FieldPath("stocks", symbol): firestore.DELETE_FIELD,
                     "cost": firestore.Increment(price * quantity * -1),
                     f"history.{today_str}": firestore.Increment(price * quantity * -1 + yesterdayValueNotAdded)
                 })
         else:
             doc.update({
-                f"stocks.{symbol}": firestore.Increment(-quantity),
+                FieldPath("stocks", symbol): firestore.Increment(-quantity),
                 "cost": firestore.Increment(price * quantity * -1),
                 f"history.{today_str}": firestore.Increment(price * quantity * -1 + yesterdayValueNotAdded)
             })
@@ -616,7 +617,7 @@ def buyStock():
     history_increment = stock_value + yesterdayValueNotAdded
 
     doc.update({
-        f"stocks.{symbol}": firestore.Increment(quantity),
+        FieldPath("stocks", symbol): firestore.Increment(quantity),
         "cost": firestore.Increment(stock_value),
         f"history.{today_str}": firestore.Increment(history_increment)
     })
@@ -636,6 +637,7 @@ if __name__ == "__main__":
     # Only for development
 
     app.run(debug=False, host="0.0.0.0", port=5000)
+
 
 
 
